@@ -6,6 +6,7 @@ import {
 } from 'alertmanager-startos/startos/utils'
 import { mkdir } from 'node:fs/promises'
 import type { ScrapeTarget } from './fileModels/store.json'
+import { i18n } from './i18n'
 import { sdk } from './sdk'
 
 export const uiPort = 9090
@@ -89,6 +90,36 @@ export function prometheusConfig(
       ...targets.map(scrapeConfig),
     ],
   })
+}
+
+/** Invalid scrape settings must not replace the last working configuration. */
+export async function checkScrapeTargets(
+  effects: T.Effects,
+  targets: ScrapeTarget[],
+): Promise<void> {
+  const check = await sdk.SubContainer.withTemp(
+    effects,
+    { imageId: 'prometheus' },
+    null,
+    'check-scrape-targets',
+    async (sub) => {
+      await sub.writeFile(configPath, prometheusConfig(targets, null))
+      return sub.exec([
+        'promtool',
+        'check',
+        'config',
+        '--syntax-only',
+        configPath,
+      ])
+    },
+  )
+  if (check.exitCode !== 0) {
+    throw new Error(
+      i18n('promtool rejected the scrape configuration: ${error}', {
+        error: (String(check.stdout) + String(check.stderr)).trim(),
+      }),
+    )
+  }
 }
 
 const alertmanagerPublic = sdk.volumes.dependencies.subpath(

@@ -1,7 +1,7 @@
 import { storeJson } from '../fileModels/store.json'
 import { i18n } from '../i18n'
 import { sdk } from '../sdk'
-import { reservedJobNames } from '../utils'
+import { checkScrapeTargets, reservedJobNames } from '../utils'
 
 const { InputSpec, Value, Variants, List } = sdk
 
@@ -159,6 +159,7 @@ export const scrapeTargets = sdk.Action.withInput(
         }),
       )
     }
+    await checkScrapeTargets(effects, input.scrapeTargets)
     await storeJson.merge(effects, { scrapeTargets: input.scrapeTargets })
   },
 )
