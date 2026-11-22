@@ -1,0 +1,10 @@
+{
+  "name": "prometheus-startos",
+  "dependencies": {
+    "@start9labs/start-sdk": "4.1.0",
+    "alertmanager-startos": "github:Start9-Community/alertmanager-startos#feat/initial-package"
+  },
+  "overrides": {
+    "@start9labs/start-sdk": "$@start9labs/start-sdk"
+  }
+}
