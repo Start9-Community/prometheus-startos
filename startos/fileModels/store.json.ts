@@ -28,10 +28,12 @@ export const scrapeTargetShape = z.looseObject({
 
 export type ScrapeTarget = z.infer<typeof scrapeTargetShape>
 
+export const defaultRetentionDays = 15
+
 const shape = z.looseObject({
   adminPassword: z.string().optional().catch(undefined),
   scrapeTargets: z.array(scrapeTargetShape).catch([]),
-  retentionDays: z.number().catch(15),
+  retentionDays: z.number().catch(defaultRetentionDays),
   retentionSizeGb: z.number().nullable().catch(null),
 })
 

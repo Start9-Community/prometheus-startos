@@ -51,6 +51,7 @@ export default {
     46: 'Las métricas más antiguas se eliminan cuando los datos superan este tamaño. Vacío no establece límite.',
     47: 'Retención',
     48: 'Elija cuánto tiempo conserva Prometheus las métricas y cuánto disco pueden ocupar.',
+    49: 'promtool rechazó la configuración de recopilación: ${error}',
   },
   de_DE: {
     0: 'Prometheus wird gestartet!',
@@ -102,6 +103,7 @@ export default {
     46: 'Die ältesten Metriken werden gelöscht, sobald die Daten diese Größe überschreiten. Leer bedeutet kein Limit.',
     47: 'Aufbewahrung',
     48: 'Legen Sie fest, wie lange Prometheus Metriken aufbewahrt und wie viel Speicherplatz sie belegen dürfen.',
+    49: 'promtool hat die Abfragekonfiguration abgelehnt: ${error}',
   },
   pl_PL: {
     0: 'Uruchamianie Prometheusa!',
@@ -153,6 +155,7 @@ export default {
     46: 'Najstarsze metryki są usuwane, gdy dane przekroczą ten rozmiar. Puste oznacza brak limitu.',
     47: 'Przechowywanie',
     48: 'Wybierz, jak długo Prometheus przechowuje metryki i ile miejsca na dysku mogą zajmować.',
+    49: 'promtool odrzucił konfigurację zbierania: ${error}',
   },
   fr_FR: {
     0: 'Démarrage de Prometheus !',
@@ -204,5 +207,6 @@ export default {
     46: 'Les métriques les plus anciennes sont supprimées dès que les données dépassent cette taille. Vide signifie aucune limite.',
     47: 'Rétention',
     48: "Choisissez combien de temps Prometheus conserve les métriques et l'espace disque qu'elles peuvent occuper.",
+    49: 'promtool a rejeté la configuration de collecte : ${error}',
   },
 } satisfies Record<string, LangDict>

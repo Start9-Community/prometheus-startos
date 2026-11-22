@@ -58,6 +58,7 @@ const dict = {
   'The oldest metrics are deleted once stored data exceeds this size. Empty sets no limit.': 46,
   Retention: 47,
   'Choose how long Prometheus keeps metrics and how much disk they may use.': 48,
+  'promtool rejected the scrape configuration: ${error}': 49,
 } as const
 
 /**

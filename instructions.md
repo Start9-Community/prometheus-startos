@@ -29,9 +29,9 @@ Open the **Web UI** interface and log in. Type a query such as `up` to see every
 ### Actions
 
 - **Set Admin Password** — creates a new password. Run it again any time you want to change it; the old password stops working right away, including for devices that push metrics.
-- **Scrape Targets** — the list of things Prometheus collects from. For each entry, give a job name and one or more `host:port` addresses. Addresses of services on this server work with HTTPS without any certificate setup.
+- **Scrape Targets** — the list of things Prometheus collects from. For each entry, give a job name and one or more `host:port` addresses. The generated configuration is checked before saving; if it is rejected, collection continues with the previous settings. Addresses of services on this server work with HTTPS without any certificate setup.
 - **Edit Rules** — your alerting and recording rules, in the upstream rules format. They are checked before they are saved, and you see the error if anything is wrong.
-- **Retention** — how many days of data to keep, and optionally the most disk space it may use.
+- **Retention** — how many days of data to keep, and optionally the most disk space it may use (up to 8,589,934,591 GB).
 
 ### Pushing metrics
 

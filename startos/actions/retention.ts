@@ -1,4 +1,4 @@
-import { storeJson } from '../fileModels/store.json'
+import { defaultRetentionDays, storeJson } from '../fileModels/store.json'
 import { i18n } from '../i18n'
 import { sdk } from '../sdk'
 
@@ -9,7 +9,7 @@ const inputSpec = InputSpec.of({
     name: i18n('Retention (days)'),
     description: i18n('Metrics older than this are deleted.'),
     required: true,
-    default: 15,
+    default: defaultRetentionDays,
     integer: true,
     min: 1,
     max: 3650,
@@ -24,6 +24,8 @@ const inputSpec = InputSpec.of({
     default: null,
     integer: true,
     min: 1,
+    // Prometheus stores base-2 sizes as signed 64-bit byte counts.
+    max: 2 ** 33 - 1,
     units: 'GB',
   }),
 })
