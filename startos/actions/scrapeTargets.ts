@@ -54,7 +54,7 @@ const targetSpec = InputSpec.of({
     name: i18n('Metrics Path'),
     required: true,
     default: '/metrics',
-    patterns: [{ regex: '/\\S*', description: i18n('Must start with "/"') }],
+    patterns: [{ regex: '^/\\S*$', description: i18n('Must start with "/"') }],
   }),
   scrapeInterval: Value.text({
     name: i18n('Scrape Interval'),

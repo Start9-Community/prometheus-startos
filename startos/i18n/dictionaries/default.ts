@@ -59,6 +59,11 @@ const dict = {
   Retention: 47,
   'Choose how long Prometheus keeps metrics and how much disk they may use.': 48,
   'promtool rejected the scrape configuration: ${error}': 49,
+  // primaryUrl.ts
+  'Set Primary URL': 50,
+  'Choose the address Prometheus puts in the links it generates, such as the source link on every alert. Prometheus restarts to apply the change.': 51,
+  'Primary URL': 52,
+  'Used for links in alerts. Every address of the Web UI works in the browser regardless of this setting.': 53,
 } as const
 
 /**

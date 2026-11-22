@@ -1,3 +1,4 @@
+import { primaryUrl } from '../primaryUrl'
 import { sdk } from '../sdk'
 import { editRules } from './editRules'
 import { retention } from './retention'
@@ -9,3 +10,4 @@ export const actions = sdk.Actions.of()
   .addAction(scrapeTargets)
   .addAction(editRules)
   .addAction(retention)
+  .addAction(primaryUrl.action)

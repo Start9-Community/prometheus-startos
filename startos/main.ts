@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { rulesYml } from './fileModels/rules.yml'
 import { storeJson } from './fileModels/store.json'
 import { i18n } from './i18n'
+import { primaryUrl } from './primaryUrl'
 import { sdk } from './sdk'
 import {
   alertmanagerTarget,
@@ -25,6 +26,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
   if (!store) throw new Error('No store.json')
   await rulesYml.read().const(effects)
   const alertmanager = await alertmanagerTarget(effects)
+  const externalUrl = await primaryUrl.bestUsable(effects).const()
 
   const subcontainer = sdk.SubContainer.of(
     effects,
@@ -80,6 +82,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
             ? [`--storage.tsdb.retention.size=${store.retentionSizeGb}GB`]
             : []),
           `--web.listen-address=:${uiPort}`,
+          ...(externalUrl ? [`--web.external-url=${externalUrl}`] : []),
           '--web.enable-remote-write-receiver',
           '--web.enable-otlp-receiver',
         ],

@@ -10,7 +10,7 @@ export const manifest = setupManifest({
   marketingUrl: 'https://prometheus.io/',
   donationUrl: null,
   description: { short, long },
-  volumes: ['main', 'dependencies'],
+  volumes: ['main', 'startos', 'dependencies'],
   images: {
     prometheus: {
       source: { dockerTag: 'prom/prometheus:v3.16.0' },

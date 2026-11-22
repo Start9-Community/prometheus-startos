@@ -52,6 +52,10 @@ export default {
     47: 'Retención',
     48: 'Elija cuánto tiempo conserva Prometheus las métricas y cuánto disco pueden ocupar.',
     49: 'promtool rechazó la configuración de recopilación: ${error}',
+    50: 'Establecer URL principal',
+    51: 'Elija la dirección que Prometheus usa en los enlaces que genera, como el enlace de origen de cada alerta. Prometheus se reinicia para aplicar el cambio.',
+    52: 'URL principal',
+    53: 'Se usa en los enlaces de las alertas. Todas las direcciones de la interfaz web funcionan en el navegador independientemente de este ajuste.',
   },
   de_DE: {
     0: 'Prometheus wird gestartet!',
@@ -104,6 +108,10 @@ export default {
     47: 'Aufbewahrung',
     48: 'Legen Sie fest, wie lange Prometheus Metriken aufbewahrt und wie viel Speicherplatz sie belegen dürfen.',
     49: 'promtool hat die Abfragekonfiguration abgelehnt: ${error}',
+    50: 'Primäre URL festlegen',
+    51: 'Wählen Sie die Adresse, die Prometheus in seinen Links verwendet, etwa im Quelllink jedes Alarms. Prometheus startet neu, um die Änderung zu übernehmen.',
+    52: 'Primäre URL',
+    53: 'Wird für Links in Alarmen verwendet. Jede Adresse der Weboberfläche funktioniert im Browser unabhängig von dieser Einstellung.',
   },
   pl_PL: {
     0: 'Uruchamianie Prometheusa!',
@@ -156,6 +164,10 @@ export default {
     47: 'Przechowywanie',
     48: 'Wybierz, jak długo Prometheus przechowuje metryki i ile miejsca na dysku mogą zajmować.',
     49: 'promtool odrzucił konfigurację zbierania: ${error}',
+    50: 'Ustaw główny adres URL',
+    51: 'Wybierz adres, którego Prometheus używa w generowanych linkach, takich jak link źródłowy każdego alertu. Prometheus uruchamia się ponownie, aby zastosować zmianę.',
+    52: 'Główny adres URL',
+    53: 'Używany w linkach w alertach. Każdy adres interfejsu webowego działa w przeglądarce niezależnie od tego ustawienia.',
   },
   fr_FR: {
     0: 'Démarrage de Prometheus !',
@@ -208,5 +220,9 @@ export default {
     47: 'Rétention',
     48: "Choisissez combien de temps Prometheus conserve les métriques et l'espace disque qu'elles peuvent occuper.",
     49: 'promtool a rejeté la configuration de collecte : ${error}',
+    50: "Définir l'URL principale",
+    51: "Choisissez l'adresse que Prometheus utilise dans les liens qu'il génère, comme le lien source de chaque alerte. Prometheus redémarre pour appliquer la modification.",
+    52: 'URL principale',
+    53: "Utilisée pour les liens des alertes. Chaque adresse de l'interface web fonctionne dans le navigateur, quel que soit ce réglage.",
   },
 } satisfies Record<string, LangDict>

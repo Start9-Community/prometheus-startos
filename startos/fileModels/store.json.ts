@@ -35,9 +35,10 @@ const shape = z.looseObject({
   scrapeTargets: z.array(scrapeTargetShape).catch([]),
   retentionDays: z.number().catch(defaultRetentionDays),
   retentionSizeGb: z.number().nullable().catch(null),
+  primaryUrl: z.string().nullable().catch(null),
 })
 
 export const storeJson = FileHelper.json(
-  { base: sdk.volumes.main, subpath: 'store.json' },
+  { base: sdk.volumes.startos, subpath: 'store.json' },
   shape,
 )

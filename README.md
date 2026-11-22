@@ -41,19 +41,19 @@ The package runs the upstream image unmodified, with the package supplying the c
 | Entrypoint    | `prometheus` with package-set flags; runs as `nobody`                       |
 | Subcontainer  | `prometheus-sub` — runs the `chown` oneshot, then the `prometheus` daemon   |
 
-The command line fixes the config path (`/etc/prometheus/prometheus.yml`), the TSDB path (`/prometheus`), the listen address (`:9090`) and the retention flags from **Retention**, and enables the remote-write receiver (`--web.enable-remote-write-receiver`) and the OTLP receiver (`--web.enable-otlp-receiver`). `SSL_CERT_FILE` points at a bundle of the image's CA certificates plus this server's root CA, so HTTPS scrape targets on this server's addresses verify.
+The command line fixes the config path (`/etc/prometheus/prometheus.yml`), the TSDB path (`/prometheus`), the listen address (`:9090`), the retention flags from **Retention** and `--web.external-url` from **Set Primary URL**, and enables the remote-write receiver (`--web.enable-remote-write-receiver`) and the OTLP receiver (`--web.enable-otlp-receiver`). `SSL_CERT_FILE` points at a bundle of the image's CA certificates plus this server's root CA, so HTTPS scrape targets on this server's addresses verify.
 
 Inspect the running instance with `start-cli package attach prometheus -n prometheus-sub -- <cmd>`; `promtool` is available inside.
 
 ## Volume and Data Layout
 
-The `main` volume holds everything worth keeping; the `dependencies` volume only hosts a read-only view of Alertmanager's published key.
+The `main` volume holds the database and rules, the `startos` volume the package's own settings; the `dependencies` volume only hosts a read-only view of Alertmanager's published key.
 
 | Volume         | Path on volume          | Mounted at                         | Contents                                                     |
 | -------------- | ----------------------- | ---------------------------------- | ------------------------------------------------------------ |
 | `main`         | `tsdb/`                 | `/prometheus`                      | The time-series database and its WAL                         |
 | `main`         | `rules/rules.yml`       | `/etc/prometheus/rules` (read-only) | Alerting and recording rules, as written by Edit Rules       |
-| `main`         | `store.json`            | not mounted                        | Admin password, scrape targets, retention                    |
+| `startos`      | `store.json`            | not mounted                        | Admin password, scrape targets, retention, primary URL       |
 | `dependencies` | `alertmanager-public/`  | not mounted                        | Alertmanager's `public` volume, mounted read-only by the package |
 
 The `chown` oneshot gives `tsdb/` to `nobody` on every start, since StartOS mounts volumes root-owned. The database grows with the number of series scraped and the retention period.
@@ -62,11 +62,11 @@ The `chown` oneshot gives `tsdb/` to `nobody` on every start, since StartOS moun
 
 The package owns the configuration Prometheus reads and regenerates it on every start; the rules file belongs to the user.
 
-- **`main/store.json`** (JSON). `adminPassword` (written by **Set Admin Password**), `scrapeTargets` (written by **Scrape Targets**), `retentionDays` and `retentionSizeGb` (written by **Retention**, defaulting to 15 days and no size limit).
+- **`startos/store.json`** (JSON). `adminPassword` (written by **Set Admin Password**), `scrapeTargets` (written by **Scrape Targets**), `retentionDays` and `retentionSizeGb` (written by **Retention**, defaulting to 15 days and no size limit), and `primaryUrl` (written by **Set Primary URL**; unset means the preferred address).
 - **`main/rules/rules.yml`** (YAML, kept verbatim with comments). Seeded at install with an empty group list. Written only by **Edit Rules**, which validates first; a hand edit survives but is not validated until Prometheus loads it.
 - **`/etc/prometheus/prometheus.yml`** in the subcontainer (no model). Regenerated on every start from `store.json` and the Alertmanager connection. It always contains a `prometheus` job scraping `localhost:9090`, an `alertmanager` job and an `alerting` block when Alertmanager is connected, one job per scrape target, and `rule_files` pointing at the rules directory. Never edit this copy; it does not survive a restart.
 
-A change to the scrape targets, retention or rules restarts Prometheus. Changing the admin password does not.
+A change to the scrape targets, retention, rules or primary URL restarts Prometheus. Changing the admin password does not.
 
 ## Dependencies
 
@@ -94,12 +94,13 @@ The admin password must be created before the service can start; everything else
 
 ## Actions
 
-Four actions cover the login, what is scraped, the rules, and how long data is kept.
+Five actions cover the login, what is scraped, the rules, how long data is kept, and the address Prometheus links to.
 
 - **Set Admin Password** — run at install (task) and whenever the password should change. Generates a 32-character password, stores it in `store.json`, and returns it. The proxy picks it up without restarting Prometheus; the old password stops working, including for pushing clients. Safe to repeat; each run replaces the password.
 - **Scrape Targets** — run to add, change or remove what Prometheus collects. Each entry becomes one scrape job: job name, `host:port` targets, scheme, metrics path, optional interval (default 15s), optional basic or bearer authentication, and an option to skip TLS verification. Job names must be unique and may not be `prometheus` or `alertmanager`. Promtool validates the generated configuration before saving; rejection leaves the stored targets and running service unchanged. Saving restarts Prometheus, which replays its WAL (seconds for a small database). Safe to repeat.
 - **Edit Rules** — run to add alerting or recording rules. Runs `promtool check rules` in a temporary container and saves only if it passes; the rejection message is promtool's. Saving restarts Prometheus. Safe to repeat.
 - **Retention** — run when the database uses too much disk or history is too short. Sets the retention time in days and an optional size limit in GB (at most 8,589,934,591, the largest whole-GB value Prometheus can represent); both are enforced, whichever is reached first. Saving restarts Prometheus; data beyond a reduced limit is deleted at Prometheus's next compaction.
+- **Set Primary URL** — run when the source link on alerts (their `generatorURL`, shown in Alertmanager and its notifications) should open a particular address, such as a public domain. The SDK's standard primary-URL action: it offers the Web UI's addresses, and while none is chosen, or the chosen one is gone, Prometheus uses the preferred address (a public domain, else `.local`). Passed as `--web.external-url`; saving restarts Prometheus. Safe to repeat.
 
 ## Tasks
 
@@ -117,7 +118,7 @@ Scrape failures are not a health check: they show on the **Targets** page of the
 
 ## Backups and Restore
 
-The `main` volume is copied wholesale (`ofVolumes`) with the service stopped, which captures the database, the rules and `store.json`.
+The `main` and `startos` volumes are copied wholesale (`ofVolumes`) with the service stopped, which captures the database, the rules and `store.json`.
 
 The `dependencies` volume is not backed up; it only holds a mount of Alertmanager's volume, which Alertmanager backs up itself. A restored Prometheus reconnects to Alertmanager on its first start. Nothing needs to be re-entered.
 
@@ -125,8 +126,7 @@ The `dependencies` volume is not backed up; it only holds a mount of Alertmanage
 
 1. **No configuration file to edit.** `prometheus.yml` is generated; only static scrape targets are supported, with no service discovery, relabelling or remote write to other systems.
 2. **Reserved job names.** `prometheus` and `alertmanager` are used by the package's own jobs.
-3. **Links in alerts point at the container.** `--web.external-url` is not set, so the source link on each alert (its `generatorURL`) uses the container's hostname and does not open from a browser.
-4. **The login is enforced by StartOS, not Prometheus.** Prometheus's own `--web.config.file` authentication is not used, and the admin API, lifecycle endpoints and agent mode are not enabled.
+3. **The login is enforced by StartOS, not Prometheus.** Prometheus's own `--web.config.file` authentication is not used, and the admin API, lifecycle endpoints and agent mode are not enabled.
 
 ---
 
@@ -139,9 +139,10 @@ architectures: [x86_64, aarch64]
 subcontainers: [prometheus-sub]
 volumes:
   main: /prometheus (subpath tsdb), /etc/prometheus/rules (subpath rules, read-only)
+  startos: not mounted
   dependencies: not mounted
 file_models:
-  - main/store.json
+  - startos/store.json
   - main/rules/rules.yml
 startos_managed_env_vars:
   - SSL_CERT_FILE
@@ -153,6 +154,7 @@ actions:
   - scrape-targets
   - edit-rules
   - retention
+  - set-primary-url
 tasks:
   - { action: set-admin-password, severity: critical }
 health_checks:
